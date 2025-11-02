@@ -1,0 +1,8 @@
+// exception/BookNotAvailableException.java
+package exception;
+
+public class BookNotAvailableException extends RuntimeException {
+    public BookNotAvailableException(String message) {
+        super(message);
+    }
+}

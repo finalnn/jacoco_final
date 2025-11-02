@@ -1,0 +1,45 @@
+package softpr;
+
+import model.User;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import service.SessionManager;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class SessionManagerTest {
+
+    private SessionManager sessionManager;
+
+    @BeforeEach
+    public void setup() {
+        sessionManager = new SessionManager();
+    }
+
+    @Test
+    public void createSessionShouldReturnValidToken() {
+        String token = sessionManager.createSession("Noor");
+        assertNotNull(token);
+        assertTrue(sessionManager.isValid(token));
+        assertEquals("Noor", sessionManager.getUsername(token));
+    }
+
+    @Test
+    public void invalidateShouldRemoveSession() {
+        String token = sessionManager.createSession("Noor");
+        assertTrue(sessionManager.isValid(token));
+        sessionManager.invalidate(token);
+        assertFalse(sessionManager.isValid(token));
+        assertNull(sessionManager.getUsername(token));
+    }
+
+    @Test
+    public void isValidShouldReturnFalseForNonExistentToken() {
+        assertFalse(sessionManager.isValid("non-existent-token"));
+    }
+
+    @Test
+    public void getUsernameShouldReturnNullForNonExistentToken() {
+        assertNull(sessionManager.getUsername("non-existent-token"));
+    }
+}
