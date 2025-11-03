@@ -1,16 +1,13 @@
 import model.*;
 import service.*;
 import exception.AuthenticationException;
-
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        // إنشاء الكائنات
         Admin admin = new Admin("admin", "1234");
         AdminService adminService = new AdminService(admin);
         BookService bookService = new BookService();
@@ -43,42 +40,78 @@ public class Main {
                     System.out.println("7. Send Overdue Reminders");
                     System.out.println("8. Logout");
                     System.out.print("Choose an option: ");
-                    int choice = sc.nextInt();
-                    sc.nextLine(); // مسح السطر المتبقي
+                    String choiceInput = sc.nextLine();
+                    int choice;
+                    try {
+                        choice = Integer.parseInt(choiceInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid input. Returning to menu.");
+                        continue;
+                    }
 
                     switch (choice) {
-                    case 1: // إضافة كتاب
-                        System.out.print("Title: ");
-                        String title = sc.nextLine();
-                        System.out.print("Author: ");
-                        String author = sc.nextLine();
-                        System.out.print("ISBN: ");
-                        String isbn = sc.nextLine();
-                        bookService.addBook(title, author, isbn); // الآن التحقق داخل BookService
-                        break;
+                        case 1:
+                            System.out.print("Title: ");
+                            String title = sc.nextLine();
+                            System.out.print("Author: ");
+                            String author = sc.nextLine();
+                            System.out.print("ISBN: ");
+                            String isbn = sc.nextLine();
+                            bookService.addBook(title, author, isbn);
+                            break;
 
-
-                        case 2: // عرض جميع الكتب
+                        case 2:
                             System.out.println("All Books:");
                             for (Book b : bookService.getAllBooks()) {
                                 System.out.println(b);
                             }
                             break;
 
-                        case 3: // البحث عن كتاب
-                            System.out.print("Search query: ");
+                        case 3:
+                            System.out.println("\nSearch by:");
+                            System.out.println("1. Title");
+                            System.out.println("2. Author");
+                            System.out.println("3. ISBN");
+                            System.out.print("Choose search type: ");
+                            String searchInput = sc.nextLine();
+                            int searchChoice;
+                            try {
+                                searchChoice = Integer.parseInt(searchInput);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input. Defaulting to Title search.");
+                                searchChoice = 1;
+                            }
+
+                            switch (searchChoice) {
+                                case 1:
+                                    bookService.setSearchStrategy(new SearchByTitle());
+                                    break;
+                                case 2:
+                                    bookService.setSearchStrategy(new SearchByAuthor());
+                                    break;
+                                case 3:
+                                    bookService.setSearchStrategy(new SearchByISBN());
+                                    break;
+                                default:
+                                    System.out.println("Invalid search type. Defaulting to Title.");
+                                    bookService.setSearchStrategy(new SearchByTitle());
+                                    break;
+                            }
+
+                            System.out.print("Enter search query: ");
                             String query = sc.nextLine();
                             List<Book> results = bookService.search(query);
                             if (results.isEmpty()) {
                                 System.out.println("No matching books found.");
                             } else {
+                                System.out.println("Search Results:");
                                 for (Book b : results) {
                                     System.out.println(b);
                                 }
                             }
                             break;
 
-                        case 4: // استعارة كتاب
+                        case 4:
                             System.out.print("User name: ");
                             String userName = sc.nextLine();
                             User user = new User(userName);
@@ -98,7 +131,7 @@ public class Main {
                             }
                             break;
 
-                        case 5: // إرجاع كتاب
+                        case 5:
                             System.out.print("User name: ");
                             String returnUserName = sc.nextLine();
                             User returnUser = new User(returnUserName);
@@ -117,23 +150,29 @@ public class Main {
                             }
                             break;
 
-                        case 6: // دفع الغرامة
+                        case 6:
                             System.out.print("User name: ");
                             String fineUserName = sc.nextLine();
                             User fineUser = new User(fineUserName);
                             System.out.print("Amount to pay: ");
-                            double amount = sc.nextDouble();
-                            sc.nextLine();
+                            String amountInput = sc.nextLine();
+                            double amount;
+                            try {
+                                amount = Double.parseDouble(amountInput);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid amount. Skipping fine payment.");
+                                break;
+                            }
                             userService.payFine(fineUser, amount);
                             System.out.println("Fine payment processed.");
                             break;
 
-                        case 7: // إرسال تذكيرات الكتب المتأخرة
+                        case 7:
                             reminderService.sendOverdueReminders(loanService.getAllLoans());
                             System.out.println("Reminders sent to users with overdue books.");
                             break;
 
-                        case 8: // تسجيل الخروج
+                        case 8:
                             adminService.logout();
                             running = false;
                             break;
