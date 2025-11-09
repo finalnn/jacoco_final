@@ -16,7 +16,7 @@ public class ReminderService {
     }
 
     public void sendOverdueReminders(List<Loan> loans) {
-        // Map لكل مستخدم -> عدد الكتب المتأخرة
+        
         Map<User, Integer> overdueCount = new HashMap<>();
 
         for (Loan loan : loans) {

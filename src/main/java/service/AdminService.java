@@ -1,11 +1,16 @@
 package service;
 
 import model.Admin;
+import model.User;
 import exception.AuthenticationException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AdminService {
+
     private final Admin admin;
-    private boolean loggedIn = false; // حالة الجلسة
+    private boolean loggedIn = false;
+    private final static List<User> users = new ArrayList<>();
 
     public AdminService(Admin admin) {
         this.admin = admin;
@@ -31,5 +36,18 @@ public class AdminService {
 
     public boolean isLoggedIn() {
         return loggedIn;
+    }
+
+    public void addUser(User user) {
+        if (!loggedIn) {
+            System.out.println("Access denied! Please log in as admin first.");
+            return;
+        }
+        users.add(user);
+        System.out.println("User added successfully: " + user.getName());
+    }
+
+    public static List<User> getAllUsers() {
+        return users;
     }
 }

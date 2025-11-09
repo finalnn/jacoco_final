@@ -2,23 +2,14 @@ package model;
 
 import java.time.LocalDate;
 
-/**
- * Represents a book in the library system.
- * Keeps track of borrowing status and due date.
- */
 public class Book {
     private final String title;
     private final String author;
     private final String isbn;
     private boolean borrowed = false;
     private LocalDate dueDate = null;
+    private User borrower = null;
 
-    /**
-     * Constructs a book with title, author, and ISBN.
-     * @param title The title of the book.
-     * @param author The author of the book.
-     * @param isbn The ISBN identifier.
-     */
     public Book(String title, String author, String isbn) {
         this.title = title;
         this.author = author;
@@ -30,34 +21,33 @@ public class Book {
     public String getIsbn() { return isbn; }
     public boolean isBorrowed() { return borrowed; }
     public LocalDate getDueDate() { return dueDate; }
+    public User getBorrower() { return borrower; }
 
-    /**
-     * Marks the book as borrowed and sets due date to 28 days from today.
-     */
-    public void borrow() {
+    public void borrow(User user) {
         borrowed = true;
+        borrower = user;
         dueDate = LocalDate.now().plusDays(28);
     }
 
-    /**
-     * Marks the book as returned and clears due date.
-     */
     public void returnBook() {
         borrowed = false;
+        borrower = null;
         dueDate = null;
     }
 
-    /**
-     * Checks if the book is overdue.
-     * @return true if overdue, false otherwise.
-     */
     public boolean isOverdue() {
         return borrowed && LocalDate.now().isAfter(dueDate);
     }
 
+    public long getDaysOverdue() {
+        if (isOverdue()) {
+            return java.time.temporal.ChronoUnit.DAYS.between(dueDate, LocalDate.now());
+        }
+        return 0;
+    }
     @Override
     public String toString() {
-        String status = borrowed ? "(Borrowed, due: " + dueDate + ")" : "(Available)";
-        return title + " by " + author + " (ISBN: " + isbn + ") " + status;
+        return "Title: " + title + ", Author: " + author + ", ISBN: " + isbn;
     }
+
 }

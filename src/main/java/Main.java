@@ -1,21 +1,37 @@
 import model.*;
 import service.*;
 import exception.AuthenticationException;
+import io.github.cdimascio.dotenv.Dotenv;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+
     public static void main(String[] args) {
+
         Scanner sc = new Scanner(System.in);
 
+        // إنشاء الكائنات الأساسية
         Admin admin = new Admin("admin", "1234");
         AdminService adminService = new AdminService(admin);
         BookService bookService = new BookService();
         UserService userService = new UserService();
         LoanService loanService = new LoanService();
         FineService fineService = new FineService();
-        EmailService emailService = new EmailService();
-        ReminderService reminderService = new ReminderService(emailService);
+
+        // تحميل معلومات الإيميل من ملف .env
+        Dotenv dotenv = Dotenv.load();
+        String emailUser = dotenv.get("EMAIL_USERNAME");
+        String emailPass = dotenv.get("EMAIL_PASSWORD");
+        EmailService emailService = new EmailService(emailUser, emailPass);
+
+        // بيانات افتراضية (مستخدم + كتاب)
+        User testUser = new User("Ali", "halaawwad455@gmail.com");
+        Book testBook = new Book("Clean Code", "Robert C. Martin", "123456");
+        bookService.addBook(testBook.getTitle(), testBook.getAuthor(), testBook.getIsbn());
 
         try {
             System.out.print("Enter username: ");
@@ -26,11 +42,12 @@ public class Main {
             adminService.login(username, password);
 
             if (adminService.isLoggedIn()) {
-                System.out.println("You can now manage books, loans, fines, and reminders.");
+                System.out.println("\n✅ Login successful!");
+                System.out.println("Welcome to the Library Management System.\n");
 
                 boolean running = true;
                 while (running) {
-                    System.out.println("\n--- MENU ---");
+                    System.out.println("====== MENU ======");
                     System.out.println("1. Add Book");
                     System.out.println("2. Show All Books");
                     System.out.println("3. Search Book");
@@ -40,6 +57,7 @@ public class Main {
                     System.out.println("7. Send Overdue Reminders");
                     System.out.println("8. Logout");
                     System.out.print("Choose an option: ");
+
                     String choiceInput = sc.nextLine();
                     int choice;
                     try {
@@ -50,7 +68,7 @@ public class Main {
                     }
 
                     switch (choice) {
-                        case 1:
+                        case 1 -> { // إضافة كتاب
                             System.out.print("Title: ");
                             String title = sc.nextLine();
                             System.out.print("Author: ");
@@ -58,16 +76,18 @@ public class Main {
                             System.out.print("ISBN: ");
                             String isbn = sc.nextLine();
                             bookService.addBook(title, author, isbn);
-                            break;
+                            System.out.println("✅ Book added successfully!\n");
+                        }
 
-                        case 2:
-                            System.out.println("All Books:");
+                        case 2 -> { // عرض جميع الكتب
+                            System.out.println("\n--- All Books ---");
                             for (Book b : bookService.getAllBooks()) {
                                 System.out.println(b);
                             }
-                            break;
+                            System.out.println();
+                        }
 
-                        case 3:
+                        case 3 -> { // البحث عن كتاب
                             System.out.println("\nSearch by:");
                             System.out.println("1. Title");
                             System.out.println("2. Author");
@@ -83,108 +103,115 @@ public class Main {
                             }
 
                             switch (searchChoice) {
-                                case 1:
-                                    bookService.setSearchStrategy(new SearchByTitle());
-                                    break;
-                                case 2:
-                                    bookService.setSearchStrategy(new SearchByAuthor());
-                                    break;
-                                case 3:
-                                    bookService.setSearchStrategy(new SearchByISBN());
-                                    break;
-                                default:
-                                    System.out.println("Invalid search type. Defaulting to Title.");
-                                    bookService.setSearchStrategy(new SearchByTitle());
-                                    break;
+                                case 1 -> bookService.setSearchStrategy(new SearchByTitle());
+                                case 2 -> bookService.setSearchStrategy(new SearchByAuthor());
+                                case 3 -> bookService.setSearchStrategy(new SearchByISBN());
+                                default -> bookService.setSearchStrategy(new SearchByTitle());
                             }
 
                             System.out.print("Enter search query: ");
                             String query = sc.nextLine();
                             List<Book> results = bookService.search(query);
                             if (results.isEmpty()) {
-                                System.out.println("No matching books found.");
+                                System.out.println("No matching books found.\n");
                             } else {
                                 System.out.println("Search Results:");
                                 for (Book b : results) {
                                     System.out.println(b);
                                 }
+                                System.out.println();
                             }
-                            break;
+                        }
 
-                        case 4:
+                        case 4 -> { // استعارة كتاب
                             System.out.print("User name: ");
-                            String userName = sc.nextLine();
-                            User user = new User(userName);
+                            String uName = sc.nextLine();
+                            System.out.print("User email: ");
+                            String uEmail = sc.nextLine();
+                            User user = new User(uName, uEmail);
+
                             System.out.print("Book title to borrow: ");
                             String borrowTitle = sc.nextLine();
                             Book borrowBook = bookService.search(borrowTitle).stream().findFirst().orElse(null);
-                            if (borrowBook != null) {
-                                boolean borrowed = bookService.borrowBook(borrowBook, user);
-                                if (borrowed) {
-                                    loanService.createLoan(borrowBook, user);
-                                    System.out.println("Book borrowed successfully!");
-                                } else {
-                                    System.out.println("Cannot borrow book (already borrowed or user has fine).");
-                                }
-                            } else {
-                                System.out.println("Book not found.");
-                            }
-                            break;
 
-                        case 5:
+                            if (borrowBook != null && bookService.borrowBook(borrowBook, user)) {
+                                loanService.createLoan(borrowBook, user);
+                                System.out.println("✅ Book borrowed successfully!\n");
+                            } else {
+                                System.out.println("❌ Cannot borrow book.\n");
+                            }
+                        }
+
+                        case 5 -> { // إرجاع كتاب
                             System.out.print("User name: ");
-                            String returnUserName = sc.nextLine();
-                            User returnUser = new User(returnUserName);
+                            String rName = sc.nextLine();
+                            System.out.print("User email: ");
+                            String rEmail = sc.nextLine();
+                            User rUser = new User(rName, rEmail);
+
                             System.out.print("Book title to return: ");
                             String returnTitle = sc.nextLine();
                             Book returnBook = bookService.search(returnTitle).stream().findFirst().orElse(null);
+
                             if (returnBook != null) {
-                                bookService.returnBook(returnBook, returnUser);
+                                bookService.returnBook(returnBook, rUser);
                                 loanService.getAllLoans().stream()
-                                        .filter(l -> l.getBook().equals(returnBook) && l.getUser().equals(returnUser))
+                                        .filter(l -> l.getBook().equals(returnBook) && l.getUser().equals(rUser))
                                         .findFirst()
                                         .ifPresent(loanService::returnLoan);
-                                System.out.println("Book returned successfully!");
+                                System.out.println("✅ Book returned successfully!\n");
                             } else {
-                                System.out.println("Book not found.");
+                                System.out.println("❌ Book not found.\n");
                             }
-                            break;
+                        }
 
-                        case 6:
+                        case 6 -> { // دفع الغرامة
                             System.out.print("User name: ");
-                            String fineUserName = sc.nextLine();
-                            User fineUser = new User(fineUserName);
+                            String fName = sc.nextLine();
+                            System.out.print("User email: ");
+                            String fEmail = sc.nextLine();
+                            User fUser = new User(fName, fEmail);
+
                             System.out.print("Amount to pay: ");
-                            String amountInput = sc.nextLine();
-                            double amount;
-                            try {
-                                amount = Double.parseDouble(amountInput);
-                            } catch (NumberFormatException e) {
-                                System.out.println("Invalid amount. Skipping fine payment.");
-                                break;
-                            }
-                            userService.payFine(fineUser, amount);
-                            System.out.println("Fine payment processed.");
-                            break;
+                            double amount = Double.parseDouble(sc.nextLine());
+                            userService.payFine(fUser, amount);
+                            System.out.println("💰 Fine payment processed.\n");
+                        }
 
-                        case 7:
-                            reminderService.sendOverdueReminders(loanService.getAllLoans());
-                            System.out.println("Reminders sent to users with overdue books.");
-                            break;
+                        case 7 -> { // إرسال تذكيرات الكتب المتأخرة عبر الإيميل
+                            System.out.println("📧 Sending overdue reminders...");
 
-                        case 8:
+                            // مثال عملي: إنشاء قرض متأخر
+                            Loan overdueLoan = new Loan(testBook, testUser);
+                            overdueLoan.setDueDate(LocalDate.now().minusDays(4));
+                            loanService.createLoan(testBook, testUser);
+
+                            long daysLate = ChronoUnit.DAYS.between(overdueLoan.getDueDate(), LocalDate.now());
+                            String subject = "📚 Overdue Book Reminder - An Najah Library";
+                            String body = "Dear " + testUser.getName() + ",\n\n" +
+                                    "The book \"" + testBook.getTitle() + "\" is overdue by " + daysLate + " day(s).\n" +
+                                    "Please return it to the library as soon as possible.\n\n" +
+                                    "📖 An Najah Library System";
+
+                            emailService.sendEmail(testUser.getEmail(), subject, body);
+                            System.out.println("✅ Reminder email sent to " + testUser.getEmail() + "\n");
+                        }
+
+                        case 8 -> { // تسجيل الخروج
                             adminService.logout();
                             running = false;
-                            break;
+                            System.out.println("Goodbye 👋");
+                        }
 
-                        default:
-                            System.out.println("Invalid option.");
+                        default -> System.out.println("Invalid option.\n");
                     }
                 }
             }
 
         } catch (AuthenticationException e) {
             System.out.println(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
