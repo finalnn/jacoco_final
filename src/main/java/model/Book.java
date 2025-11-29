@@ -20,6 +20,7 @@ public class Book {
     public String getAuthor() { return author; }
     public String getIsbn() { return isbn; }
     public boolean isBorrowed() { return borrowed; }
+    
     public LocalDate getDueDate() { return dueDate; }
     public User getBorrower() { return borrower; }
 

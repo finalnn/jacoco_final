@@ -16,6 +16,13 @@ public class BookService extends Observable {
         books.add(new Book(title, author, isbn));
     }
 
+    public void addBook(Book book) {
+        boolean exists = books.stream().anyMatch(b -> b.getIsbn().equals(book.getIsbn()));
+        if (!exists) {
+            books.add(book);
+        }
+    }
+
     public List<Book> getAllBooks() {
         return books;
     }

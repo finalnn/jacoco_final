@@ -9,6 +9,8 @@ public class Loan {
     private LocalDate dueDate;  // غيرنا final لتسهيل التعديل
     private boolean returned = false;
 
+    
+    
     public Loan(Book book, User user) {
         this.book = book;
         this.user = user;

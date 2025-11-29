@@ -18,18 +18,19 @@ public class FineServiceTest {
     @BeforeEach
     public void setup() {
         fineService = new FineService();
-        user = new User("Noor");
+        user = new User("Noor","noorfayek321@gmail.com");
     }
 
     @Test
-    public void addFineIncreasesUserBalance() {
+    public void addFineShouldIncreaseUserBalanceAndAddFine() {
         Fine fine = fineService.addFine(user, 5);
         assertEquals(5, user.getFineBalance());
         assertFalse(fine.isPaid());
+        assertTrue(fineService.getAllFines().contains(fine));
     }
 
     @Test
-    public void payFineSetsPaidAndUpdatesUserBalance() {
+    public void payFineShouldSetPaidAndResetBalance() {
         Fine fine = fineService.addFine(user, 10);
         fineService.payFine(fine);
         assertTrue(fine.isPaid());
@@ -37,19 +38,41 @@ public class FineServiceTest {
     }
 
     @Test
-    public void getUserFinesReturnsOnlyUnpaid() {
-        fineService.addFine(user, 5);
+    public void getUserFinesShouldReturnOnlyUnpaidFines() {
+        Fine fine1 = fineService.addFine(user, 5);
         Fine fine2 = fineService.addFine(user, 10);
         fineService.payFine(fine2);
         List<Fine> unpaid = fineService.getUserFines(user);
         assertEquals(1, unpaid.size());
+        assertTrue(unpaid.contains(fine1));
     }
 
     @Test
-    public void getAllFinesReturnsAll() {
+    void testGetAmount() {
+        User user = new User("Noor", "noor@gmail.com");
+        Fine fine = new Fine(user, 10.0);
+
+        assertEquals(10.0, fine.getAmount());
+    }
+    @Test
+    public void getAllFinesShouldReturnAllFines() {
         fineService.addFine(user, 5);
         fineService.addFine(user, 10);
-        List<Fine> all = fineService.getAllFines();
-        assertEquals(2, all.size());
+        List<Fine> fines = fineService.getAllFines();
+        assertEquals(2, fines.size());
     }
+
+    @Test
+    public void payFineShouldNotAffectOtherUsers() {
+        User user2 = new User("Mohammad", "noorfayek2018@gmail.com"); // كائن منفصل
+        Fine fine1 = fineService.addFine(user, 5);
+        Fine fine2 = fineService.addFine(user2, 5);
+
+        fineService.payFine(fine1);
+
+        assertEquals(0, user.getFineBalance());
+        assertEquals(5, user2.getFineBalance());
+        assertFalse(fine2.isPaid());
+    }
+
 }
