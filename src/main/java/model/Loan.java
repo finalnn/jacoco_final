@@ -6,17 +6,17 @@ public class Loan {
     private final Book book;
     private final User user;
     private final LocalDate borrowDate;
-    private LocalDate dueDate;  // غيرنا final لتسهيل التعديل
+    private LocalDate dueDate;
     private boolean returned = false;
 
-    
-    
     public Loan(Book book, User user) {
         this.book = book;
         this.user = user;
         this.borrowDate = LocalDate.now();
-        this.dueDate = borrowDate.plusDays(28); // 28 يوم استعارة
+        this.dueDate = borrowDate.plusDays(28);
+
         this.book.borrow(user);
+        user.addLoan(this); // ⭐ مهم لإدارة القروض
     }
 
     public Book getBook() { return book; }
@@ -25,7 +25,6 @@ public class Loan {
     public LocalDate getDueDate() { return dueDate; }
     public boolean isReturned() { return returned; }
 
-    // Setter جديد لتاريخ الاستحقاق
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }

@@ -2,6 +2,7 @@ package service;
 
 import model.Admin;
 import model.User;
+import model.Loan;
 import exception.AuthenticationException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +26,8 @@ public class AdminService {
         }
     }
 
-    
     public void logout() {
-        if (loggedIn) {
-            loggedIn = false;
-            System.out.println("Logout successful. Session closed securely.");
-        } else {
-            System.out.println("No active session to logout from.");
-        }
+        if (loggedIn) loggedIn = false;
     }
 
     public boolean isLoggedIn() {
@@ -40,12 +35,26 @@ public class AdminService {
     }
 
     public void addUser(User user) {
+        if (!loggedIn) return;
+        users.add(user);
+    }
+
+    public void unregisterUser(User user) {
         if (!loggedIn) {
             System.out.println("Access denied! Please log in as admin first.");
             return;
         }
-        users.add(user);
-        System.out.println("User added successfully: " + user.getName());
+        if (user.getFineBalance() > 0) {
+            System.out.println("Cannot unregister user with unpaid fines.");
+            return;
+        }
+        boolean hasActiveLoan = user.getLoans().stream().anyMatch(l -> !l.isReturned());
+        if (hasActiveLoan) {
+            System.out.println("Cannot unregister user with active loans.");
+            return;
+        }
+        users.remove(user);
+        System.out.println("User " + user.getName() + " unregistered successfully.");
     }
 
     public static List<User> getAllUsers() {

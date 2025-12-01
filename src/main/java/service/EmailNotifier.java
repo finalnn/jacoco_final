@@ -33,9 +33,7 @@ public class EmailNotifier implements Observer {
                 // إرسال البريد
                 emailService.sendEmail(email, subject, body);
 
-                // لو تحبي، نسخة لك أو لإيميل ثابت
-                // emailService.sendEmail("deemahamdan2004@gmail.com", subject, body);
-
+              
                 System.out.println("Email sent to " + email + " about book: " + bookTitle);
             } catch (Exception e) {
                 System.err.println("Failed to send email: " + e.getMessage());

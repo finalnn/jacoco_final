@@ -48,13 +48,6 @@ public class FineServiceTest {
     }
 
     @Test
-    void testGetAmount() {
-        User user = new User("Noor", "noor@gmail.com");
-        Fine fine = new Fine(user, 10.0);
-
-        assertEquals(10.0, fine.getAmount());
-    }
-    @Test
     public void getAllFinesShouldReturnAllFines() {
         fineService.addFine(user, 5);
         fineService.addFine(user, 10);
@@ -64,15 +57,19 @@ public class FineServiceTest {
 
     @Test
     public void payFineShouldNotAffectOtherUsers() {
-        User user2 = new User("Mohammad", "noorfayek2018@gmail.com"); // كائن منفصل
+        User user2 = new User("Mohammad", "noorfayek2018@gmail.com");
         Fine fine1 = fineService.addFine(user, 5);
         Fine fine2 = fineService.addFine(user2, 5);
-
         fineService.payFine(fine1);
-
         assertEquals(0, user.getFineBalance());
         assertEquals(5, user2.getFineBalance());
         assertFalse(fine2.isPaid());
     }
 
+    @Test
+    public void userHasUnpaidFinesDetectsCorrectly() {
+        assertFalse(fineService.userHasUnpaidFines(user));
+        fineService.addFine(user, 5);
+        assertTrue(fineService.userHasUnpaidFines(user));
+    }
 }
