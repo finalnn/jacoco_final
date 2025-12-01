@@ -49,12 +49,11 @@ public class User {
     }
 
     public boolean canBorrow() {
-        // شرط 1: لا غرامات غير مدفوعة
-        if (fineBalance > 0) {
+        
+    	if (fineBalance > 0) {
             return false;
         }
 
-        // شرط 2: لا كتب متأخرة
         if (hasOverdueBooks()) {
             return false;
         }

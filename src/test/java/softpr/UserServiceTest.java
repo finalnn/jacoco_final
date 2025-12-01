@@ -23,6 +23,12 @@ public class UserServiceTest {
     }
 
     @Test
+    void addFineShouldIncreaseUserBalance() {
+        assertEquals(0, user.getFineBalance());
+        userService.addFine(user, 15.0);
+        assertEquals(15.0, user.getFineBalance());
+    }
+    @Test
     public void userCanBorrowWhenNoFineAndNoOverdue() {
         assertTrue(userService.canBorrow(user));
         assertEquals("You can borrow books.", userService.getBorrowStatus(user));

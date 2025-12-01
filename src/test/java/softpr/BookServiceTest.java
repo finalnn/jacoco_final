@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import service.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observer;
 
@@ -38,6 +39,60 @@ public class BookServiceTest {
     }
 
     @Test
+    void bookGetFinePerDayShouldReturnCorrectValue() {
+        Book book = new Book("Data Structures", "Mark Allen", "002");
+        assertEquals(10.0, book.getFinePerDay());
+    }
+
+    @Test
+    void bookSetDueDateShouldChangeDueDate() {
+        Book book = new Book("Data Structures", "Mark Allen", "002");
+        LocalDate newDate = LocalDate.now().plusDays(5);
+        book.setDueDate(newDate);
+        assertEquals(newDate, book.getDueDate());
+    }
+    
+    @Test
+    void searchWithNoStrategyReturnsEmpty() {
+        BookService service = new BookService();
+        List<Book> result = service.search("Java");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void searchWithStrategyFindsBooks() {
+        BookService service = new BookService();
+        service.addBook("Java Basics", "Author A", "001");
+        service.setSearchStrategy((books, query) -> {
+            List<Book> result = new ArrayList<>();
+            for (Book b : books) {
+                if (b.getTitle().contains(query)) result.add(b);
+            }
+            return result;
+        });
+
+        List<Book> result = service.search("Java");
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void searchWithStrategyNoMatches() {
+        BookService service = new BookService();
+        service.addBook("Python Basics", "Author B", "002");
+        service.setSearchStrategy((books, query) -> {
+            List<Book> result = new ArrayList<>();
+            for (Book b : books) {
+                if (b.getTitle().contains(query)) result.add(b);
+            }
+            return result;
+        });
+
+        List<Book> result = service.search("Java");
+        assertTrue(result.isEmpty());
+    }
+
+
+    @Test
     public void borrowAvailableBookSucceeds() {
         Book book = new Book("Algorithms", "Sedgewick", "002");
         User user = new User("Noor", "noorfayek321@gmail.com");
@@ -45,6 +100,21 @@ public class BookServiceTest {
         assertTrue(result);
         assertTrue(book.isBorrowed());
     }
+    
+    @Test
+    void testGetDaysOverdueDirectly() throws Exception {
+        User user = new User("Noor", "noor@gmail.com");
+        Book book = new Book("Java", "Author", "006");
+        book.borrow(user);
+
+       
+        var field = Book.class.getDeclaredField("dueDate");
+        field.setAccessible(true);
+        field.set(book, java.time.LocalDate.now().minusDays(3));
+
+        assertEquals(3, book.getDaysOverdue());
+    }
+
 
     @Test
     public void borrowFailsIfBookAlreadyBorrowed() {
@@ -145,17 +215,15 @@ public class BookServiceTest {
     void testGetDaysOverdue() {
         User user = new User("Noor", "noor@gmail.com");
 
-        // نخلق subclass لجعل الكتاب متأخر
         Book book = new Book("Java", "Author", "001") {
             @Override
             public boolean isOverdue() {
-                return true; // نجعل الكتاب متأخر
-            }
+                return true; }
 
             @Override
             public long getDaysOverdue() {
-                // تحاكي الفرق بين dueDate واليوم
-                return java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now().minusDays(5), LocalDate.now());
+                
+            	return java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now().minusDays(5), LocalDate.now());
             }
         };
 
@@ -171,15 +239,14 @@ public class BookServiceTest {
         BookService service = new BookService();
         User user = new User("Noor", "noorfayek321@gmail.com");
 
-        // إنشاء كتاب subclass لتجاوز isOverdue
         Book book = new Book("Java", "Author", "005") {
             @Override
             public boolean isOverdue() { return true; }
         };
         book.borrow(user);
 
-        service.addBook(book); // استخدم addBook(Book) الجديدة
-
+        service.addBook(book); 
+        
         Observer observer = mock(Observer.class);
         service.addObserver(observer);
 

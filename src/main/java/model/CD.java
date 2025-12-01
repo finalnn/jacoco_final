@@ -2,35 +2,43 @@ package model;
 
 import java.time.LocalDate;
 
-public class Book implements Media{
+public class CD  implements Media {
     private final String title;
-    private final String author;
-    private final String isbn;
+    private final String artist;
     private boolean borrowed = false;
     private LocalDate dueDate = null;
     private User borrower = null;
+    private String id;
+    private double fine;
 
-    public Book(String title, String author, String isbn) {
+    public CD(String title, String artist, String id) {
         this.title = title;
-        this.author = author;
-        this.isbn = isbn;
+        this.artist = artist;
+        this.id = id;
+        this.borrowed = false;
+        this.fine = 0;
     }
 
     public String getTitle() { return title; }
-    public String getAuthor() { return author; }
-    public String getIsbn() { return isbn; }
+    public String getArtist() { return artist; }
     public boolean isBorrowed() { return borrowed; }
-    
     public LocalDate getDueDate() { return dueDate; }
     public User getBorrower() { return borrower; }
 
+    @Override
     public void borrow(User user) {
         borrowed = true;
         borrower = user;
-        dueDate = LocalDate.now().plusDays(28);
+        dueDate = LocalDate.now().plusDays(7); // US5.1: 7 أيام
     }
 
-    public void returnBook() {
+    @Override
+    public double getFinePerDay() {
+        return 20.0; // NIS
+    }
+
+
+    public void returnCD() {
         borrowed = false;
         borrower = null;
         dueDate = null;
@@ -48,23 +56,15 @@ public class Book implements Media{
     }
     
     @Override
-    public double getFinePerDay() {
-        return 10.0; // NIS
-    }
-
-    @Override
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
-
-    
     @Override
     public void returnMedia() {
-        returnBook();
+        returnCD(); // نستدعي الطريقة القديمة
     }
     @Override
     public String toString() {
-        return "Title: " + title + ", Author: " + author + ", ISBN: " + isbn;
+        return "CD: " + title + ", Artist: " + artist;
     }
-
 }

@@ -1,40 +1,50 @@
 package model;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 public class Loan {
-    private final Book book;
+    private final Media media;
     private final User user;
-    private final LocalDate borrowDate;
+    private final LocalDate borrowDate; // تاريخ الاستعارة
     private LocalDate dueDate;
     private boolean returned = false;
 
-    public Loan(Book book, User user) {
-        this.book = book;
+    public Loan(Media media, User user) {
+        this.media = media;
         this.user = user;
         this.borrowDate = LocalDate.now();
-        this.dueDate = borrowDate.plusDays(28);
+        this.dueDate = borrowDate.plusDays(
+            media instanceof Book ? 28 : 7
+        );
 
-        this.book.borrow(user);
-        user.addLoan(this); // ⭐ مهم لإدارة القروض
+        media.borrow(user);
+        user.addLoan(this);
     }
 
-    public Book getBook() { return book; }
+    public Media getMedia() { return media; }
     public User getUser() { return user; }
-    public LocalDate getBorrowDate() { return borrowDate; }
+    public LocalDate getBorrowDate() { return borrowDate; } // ✅ هنا أضفنا getter
     public LocalDate getDueDate() { return dueDate; }
     public boolean isReturned() { return returned; }
-
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
-
-    public void markReturned() {
-        returned = true;
-        book.returnBook();
-    }
 
     public boolean isOverdue() {
         return !returned && LocalDate.now().isAfter(dueDate);
     }
+
+    public long getDaysOverdue() {
+        if (isOverdue()) return ChronoUnit.DAYS.between(dueDate, LocalDate.now());
+        return 0;
+    }
+
+    public double getFineAmount() {
+        return getDaysOverdue() * media.getFinePerDay();
+    }
+
+    public void markReturned() {
+        returned = true;
+        media.returnMedia();
+    }
+
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; } 
 }

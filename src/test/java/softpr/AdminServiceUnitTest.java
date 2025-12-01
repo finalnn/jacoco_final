@@ -29,7 +29,7 @@ public class AdminServiceUnitTest {
         loanService = new LoanService();
     }
 
-    // ===== Login / Logout Tests =====
+    
     @Test
     public void validLoginShouldSetIsLoggedInTrue() {
         AdminService as = new AdminService(admin);
@@ -61,7 +61,7 @@ public class AdminServiceUnitTest {
         assertFalse(as.isLoggedIn());
     }
 
-    // ===== Unregister User Tests =====
+   
     @Test
     public void adminCanUnregisterUserWithNoLoansOrFines() {
         assertTrue(AdminService.getAllUsers().contains(user));

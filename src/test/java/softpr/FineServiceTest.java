@@ -22,6 +22,12 @@ public class FineServiceTest {
     }
 
     @Test
+    public void fineGetAmountShouldReturnCorrectValue() {
+        Fine fine = fineService.addFine(user, 15);
+        assertEquals(15, fine.getAmount());
+    }
+
+    @Test
     public void addFineShouldIncreaseUserBalanceAndAddFine() {
         Fine fine = fineService.addFine(user, 5);
         assertEquals(5, user.getFineBalance());

@@ -28,7 +28,7 @@ public class ReminderService {
             }
         }
 
-        // إرسال بريد مرة واحدة لكل مستخدم
+        
         for (Map.Entry<User, Integer> entry : overdueCount.entrySet()) {
             User user = entry.getKey();
             int n = entry.getValue();
