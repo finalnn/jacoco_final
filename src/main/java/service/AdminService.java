@@ -18,13 +18,14 @@ public class AdminService {
     }
 
     public void login(String username, String password) {
-        if (admin.getUsername().equals(username) && admin.getPassword().equals(password)) {
+        if (admin.getUsername().equals(username) && admin.checkPassword(password)) {
             loggedIn = true;
             System.out.println("Login successful! Welcome, admin.");
         } else {
             throw new AuthenticationException("Invalid credentials!");
         }
     }
+
 
     public void logout() {
         if (loggedIn) loggedIn = false;

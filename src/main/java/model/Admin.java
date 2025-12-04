@@ -1,14 +1,22 @@
 package model;
 
-public class Admin {
-    private final String username;
-    private final String password;
+import org.mindrot.jbcrypt.BCrypt;
 
-    public Admin(String username, String password) {
+public class Admin {
+
+    private final String username;
+    private final String passwordHash;
+
+    public Admin(String username, String rawPassword) {
         this.username = username;
-        this.password = password;
+        this.passwordHash = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
     }
 
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
+    public String getUsername() {
+        return username;
+    }
+
+    public boolean checkPassword(String inputPassword) {
+        return BCrypt.checkpw(inputPassword, this.passwordHash);
+    }
 }

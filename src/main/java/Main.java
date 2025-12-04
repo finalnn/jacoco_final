@@ -28,10 +28,10 @@ public class Main {
 
         // ======= Default Users =======
         List<User> users = new ArrayList<>();
-        User u1 = new User("Noor", "noorfayek321@gmail.com"); // Book fine
-        User u2 = new User("Hala", "noorfayek2018@gmail.com"); // CD fine
-        User u3 = new User("Ali", "s12217844@stu.najah.edu"); // Book + CD fine
-        User u4 = new User("Sara", "sara@gmail.com"); // no fine
+        User u1 = new User("Noor", "noorfayek321@gmail.com");
+        User u2 = new User("Hala", "noorfayek2018@gmail.com");
+        User u3 = new User("Ali", "s12217844@stu.najah.edu");
+        User u4 = new User("Sara", "sara@gmail.com");
         users.addAll(Arrays.asList(u1,u2,u3,u4));
 
         // ======= Services =======
@@ -42,23 +42,29 @@ public class Main {
         Dotenv dotenv = Dotenv.load();
         String emailUser = dotenv.get("EMAIL_USERNAME");
         String emailPass = dotenv.get("EMAIL_PASSWORD");
+        String adminUsername = dotenv.get("ADMIN_USERNAME");
+        String adminPassword = dotenv.get("ADMIN_PASSWORD");
+
         EmailService emailService = new EmailService(emailUser, emailPass);
         MediaEmailNotifier notifier = new MediaEmailNotifier(emailService);
 
+        // ======= Admin =======
+        Admin admin = new Admin(adminUsername, adminPassword);
+
         // ======= Borrow Books & CDs Automatically =======
-        Loan l1 = loanService.createLoan(b1, u1); // Noor -> Book
-        Loan l2 = loanService.createLoan(cd1, u2); // Hala -> CD
-        Loan l3 = loanService.createLoan(b2, u3); // Ali -> Book
-        Loan l4 = loanService.createLoan(cd2, u3); // Ali -> CD
+        Loan l1 = loanService.createLoan(b1, u1);
+        Loan l2 = loanService.createLoan(cd1, u2);
+        Loan l3 = loanService.createLoan(b2, u3);
+        Loan l4 = loanService.createLoan(cd2, u3);
 
         // تعديل المواعيد للقروض لتوليد غرامات
         try {
             var field = Loan.class.getDeclaredField("dueDate");
             field.setAccessible(true);
-            field.set(l1, LocalDate.now().minusDays(29)); // Noor Book overdue
-            field.set(l2, LocalDate.now().minusDays(8));  // Hala CD overdue
-            field.set(l3, LocalDate.now().minusDays(30)); // Ali Book overdue
-            field.set(l4, LocalDate.now().minusDays(8));  // Ali CD overdue
+            field.set(l1, LocalDate.now().minusDays(29));
+            field.set(l2, LocalDate.now().minusDays(8));
+            field.set(l3, LocalDate.now().minusDays(30));
+            field.set(l4, LocalDate.now().minusDays(8));
         } catch(Exception ignored){}
 
         // إضافة الغرامات تلقائياً
@@ -67,8 +73,7 @@ public class Main {
         if(l3.isOverdue()) fineService.addFine(u3, l3.getFineAmount());
         if(l4.isOverdue()) fineService.addFine(u3, l4.getFineAmount());
 
-        Admin admin = new Admin("admin", "1234");
-
+        // ======= Main Menu =======
         while(true){
             System.out.println("\n===== Library System =====");
             System.out.println("1. Login as Admin");
@@ -78,9 +83,12 @@ public class Main {
             int choice = sc.nextInt(); sc.nextLine();
 
             if(choice==1){
-                System.out.print("Admin username: "); String name = sc.nextLine();
-                System.out.print("Password: "); String pass = sc.nextLine();
-                if(name.equals(admin.getUsername()) && pass.equals(admin.getPassword())){
+                System.out.print("Admin username: "); 
+                String name = sc.nextLine();
+                System.out.print("Password: "); 
+                String pass = sc.nextLine();
+
+                if(name.equals(admin.getUsername()) && admin.checkPassword(pass)){
                     System.out.println("✅ Admin login successful!");
                     adminMenu(sc, books, cds, users, loanService, notifier);
                 } else System.out.println("❌ Invalid username or password.");
@@ -108,6 +116,7 @@ public class Main {
         sc.close();
     }
 
+    // ======= Admin Menu =======
     private static void adminMenu(Scanner sc, List<Book> books, List<CD> cds, List<User> users, LoanService loanService, MediaEmailNotifier notifier){
         while(true){
             System.out.println("\n===== Admin Menu =====");
@@ -186,6 +195,7 @@ public class Main {
         }
     }
 
+    // ======= User Menu =======
     private static void userMenu(Scanner sc, User user, List<Book> books, List<CD> cds, LoanService loanService){
         while(true){
             System.out.println("\n===== User Menu =====");
