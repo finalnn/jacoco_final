@@ -67,4 +67,9 @@ public class CD  implements Media {
     public String toString() {
         return "CD: " + title + ", Artist: " + artist;
     }
+
+	public String getId() {
+		// TODO Auto-generated method stub
+		   return id;
+	}
 }

@@ -26,26 +26,26 @@ class MediaEmailNotifierTest {
         notifier = new MediaEmailNotifier(mockEmailService);
         user = new User("Noor", "noorfayek321@gmail.com");
     }
+
     @Test
-    void testSendOverdueEmailSendsEmailForBook() {
+    void testSendOverdueEmailForBook() {
         Book book = new Book("Algorithms", "Author", "001");
         Loan overdueLoan = new Loan(book, user);
-        overdueLoan.setDueDate(LocalDate.now().minusDays(2)); // متأخر
+        overdueLoan.setDueDate(LocalDate.now().minusDays(2));
 
-        notifier.sendOverdueEmail(user, List.of(overdueLoan));
+        notifier.update(null, user);
 
         verify(mockEmailService, times(1))
                 .sendEmail(eq(user.getEmail()), anyString(), contains("Algorithms"));
     }
 
-
     @Test
-    void testSendOverdueEmailSendsEmailForCD() {
+    void testSendOverdueEmailForCD() {
         CD cd = new CD("Rock Classics", "Queen", "CD001");
         Loan overdueLoan = new Loan(cd, user);
         overdueLoan.setDueDate(LocalDate.now().minusDays(3));
 
-        notifier.sendOverdueEmail(user, List.of(overdueLoan));
+        notifier.update(null, user);
 
         verify(mockEmailService, times(1))
                 .sendEmail(eq(user.getEmail()), anyString(), contains("Rock Classics"));
@@ -54,10 +54,10 @@ class MediaEmailNotifierTest {
     @Test
     void testSendOverdueEmailDoesNothingIfNoOverdue() {
         Book book = new Book("Clean Code", "Robert", "002");
-        Loan loan = new Loan(book, user); 
+        Loan loan = new Loan(book, user);
         loan.setDueDate(LocalDate.now().plusDays(5));
 
-        notifier.sendOverdueEmail(user, List.of(loan));
+        notifier.update(null, user);
 
         verify(mockEmailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
@@ -72,13 +72,11 @@ class MediaEmailNotifierTest {
                 .when(mockEmailService)
                 .sendEmail(anyString(), anyString(), anyString());
 
-        notifier.sendOverdueEmail(user, List.of(overdueLoan));
+        notifier.update(null, user);
 
-         verify(mockEmailService, times(1))
+        verify(mockEmailService, times(1))
                 .sendEmail(anyString(), anyString(), anyString());
     }
-    
-    
 
     @Test
     void testSendOverdueEmailMultipleLoans() {
@@ -90,11 +88,17 @@ class MediaEmailNotifierTest {
         Loan loan2 = new Loan(cd, user);
         loan2.setDueDate(LocalDate.now().minusDays(2));
 
-        notifier.sendOverdueEmail(user, List.of(loan1, loan2));
+        notifier.update(null, user);
 
         verify(mockEmailService, times(1))
                 .sendEmail(eq(user.getEmail()), anyString(), contains("Algorithms"));
         verify(mockEmailService, times(1))
                 .sendEmail(eq(user.getEmail()), anyString(), contains("Jazz Hits"));
+    }
+
+    @Test
+    void testUpdateWithNonUserObjectDoesNothing() {
+        notifier.update(null, "Not a user");
+        verifyNoInteractions(mockEmailService);
     }
 }
