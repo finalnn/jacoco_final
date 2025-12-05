@@ -28,6 +28,16 @@ class CDTest {
         assertNull(cd.getDueDate());
         assertNull(cd.getBorrower());
     }
+    @Test
+    void testIsOverdueWhenNotBorrowed() {
+        assertFalse(cd.isOverdue());
+    }
+    @Test
+    void testDaysOverdueWhenNotOverdue() {
+        cd.borrow(user);
+        cd.setDueDate(LocalDate.now().plusDays(5)); // لسه مش متأخر
+        assertEquals(0, cd.getDaysOverdue());
+    }
 
     @Test
     void testBorrowCD() {

@@ -26,18 +26,18 @@ class MediaEmailNotifierTest {
         notifier = new MediaEmailNotifier(mockEmailService);
         user = new User("Noor", "noorfayek321@gmail.com");
     }
-
     @Test
     void testSendOverdueEmailSendsEmailForBook() {
         Book book = new Book("Algorithms", "Author", "001");
         Loan overdueLoan = new Loan(book, user);
-        overdueLoan.setDueDate(LocalDate.now().minusDays(2));
+        overdueLoan.setDueDate(LocalDate.now().minusDays(2)); // متأخر
 
         notifier.sendOverdueEmail(user, List.of(overdueLoan));
 
         verify(mockEmailService, times(1))
                 .sendEmail(eq(user.getEmail()), anyString(), contains("Algorithms"));
     }
+
 
     @Test
     void testSendOverdueEmailSendsEmailForCD() {
@@ -77,6 +77,8 @@ class MediaEmailNotifierTest {
          verify(mockEmailService, times(1))
                 .sendEmail(anyString(), anyString(), anyString());
     }
+    
+    
 
     @Test
     void testSendOverdueEmailMultipleLoans() {
