@@ -5,7 +5,7 @@ import model.*;
 import service.*;
 
 public class Main {
-	
+	/*
     private static final int BORROW_DAYS = 28;
 
     public static void main(String[] args) {
@@ -402,4 +402,4 @@ public class Main {
             }
         }
     }
-}
+*/}
