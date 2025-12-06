@@ -83,11 +83,11 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.12</version>
-            <configuration>
+           <!-- <configuration>
     <excludes>
         <exclude>exception/*</exclude>
     </excludes>
-</configuration>
+</configuration> -->
 
             <executions>
                 <execution>
