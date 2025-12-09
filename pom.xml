@@ -11,7 +11,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.release>22</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
+             <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.jupiter.version>5.11.3</junit.jupiter.version>
         <mockito.version>5.20.0</mockito.version>
@@ -76,7 +77,7 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>3.13.0</version>
             <configuration>
-                <release>22</release>
+                <release>17</release>
             </configuration>
             
         </plugin>
@@ -101,8 +102,8 @@
                 </execution>
                 
                 <execution>
-                    <id>report</id>
-                    <phase>test</phase>
+                    <id>generate-report</id>
+                    <phase>verify</phase>
                     <goals>
                         <goal>report</goal>
                     </goals>
