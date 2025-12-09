@@ -17,7 +17,7 @@
         <junit.jupiter.version>5.11.3</junit.jupiter.version>
         <mockito.version>5.20.0</mockito.version>
              
-  <sonar.organization>finalnn</sonar.organization>
+   <sonar.organization>finalnn</sonar.organization>
 
         <!-- JaCoCo أحدث إصدار يدعم Java 22 رسميًا -->
         <jacoco.version>0.8.12</jacoco.version>
